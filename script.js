@@ -1,111 +1,58 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Monse Underwear</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
+const cart = [];
 
-  <!-- Encabezado -->
-  <header>
-    <h1>Monse Underwear</h1>
-    <p>Ropa interior para hombre y mujer | Compra en línea fácil y rápida</p>
-  </header>
+// Botones "Agregar al carrito"
+document.querySelectorAll(".add-to-cart").forEach(button => {
+  button.addEventListener("click", () => {
+    const name = button.getAttribute("data-name");
+    const price = parseFloat(button.getAttribute("data-price"));
+    const quantity = parseInt(button.previousElementSibling.value);
 
-  <!-- Productos -->
-  <section class="container my-5">
-    <h2 class="text-center mb-4">Nuestros Productos</h2>
-    <div class="row">
-      <div class="col-md-4 mb-4">
-        <div class="card product-card">
-          <img src="img/boxer.jpg" class="card-img-top" alt="Boxer Hombre">
-          <div class="card-body text-center">
-            <h5 class="card-title">Boxer Hombre</h5>
-            <p class="card-text">$8.00</p>
-            <input type="number" min="1" value="1" class="form-control mb-2 quantity">
-            <button class="btn btn-dark w-100 add-to-cart" data-name="Boxer Hombre" data-price="8">Agregar al carrito</button>
-          </div>
-        </div>
-      </div>
+    const existingItem = cart.find(item => item.name === name);
+    if (existingItem) {
+      existingItem.quantity += quantity;
+    } else {
+      cart.push({ name, price, quantity });
+    }
 
-      <div class="col-md-4 mb-4">
-        <div class="card product-card">
-          <img src="img/bralette.jpg" class="card-img-top" alt="Bralette Mujer">
-          <div class="card-body text-center">
-            <h5 class="card-title">Bralette Mujer</h5>
-            <p class="card-text">$12.00</p>
-            <input type="number" min="1" value="1" class="form-control mb-2 quantity">
-            <button class="btn btn-dark w-100 add-to-cart" data-name="Bralette Mujer" data-price="12">Agregar al carrito</button>
-          </div>
-        </div>
-      </div>
+    // Mostrar formulario al agregar
+    openCheckoutForm();
+  });
+});
 
-      <div class="col-md-4 mb-4">
-        <div class="card product-card">
-          <img src="img/panty.jpg" class="card-img-top" alt="Panty Mujer">
-          <div class="card-body text-center">
-            <h5 class="card-title">Panty Mujer</h5>
-            <p class="card-text">$6.00</p>
-            <input type="number" min="1" value="1" class="form-control mb-2 quantity">
-            <button class="btn btn-dark w-100 add-to-cart" data-name="Panty Mujer" data-price="6">Agregar al carrito</button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
+// Función para abrir el modal con info del carrito
+function openCheckoutForm() {
+  const fecha = new Date().toLocaleString();
+  const productos = cart.map(item => `${item.name} (x${item.quantity})`).join(", ");
+  const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0).toFixed(2);
 
-  <!-- Modal Formulario -->
-  <div class="modal fade" id="checkoutModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header bg-pink">
-          <h5 class="modal-title">Completa tus datos</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-        </div>
-        <div class="modal-body">
-          <form id="checkoutForm">
-            <div class="mb-3">
-              <label class="form-label">Fecha</label>
-              <input type="text" id="fecha" class="form-control" readonly>
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Cliente</label>
-              <input type="text" id="cliente" class="form-control" required>
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Email</label>
-              <input type="email" id="email" class="form-control" required>
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Celular</label>
-              <input type="tel" id="celular" class="form-control" required>
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Productos</label>
-              <textarea id="productos" class="form-control" readonly></textarea>
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Total</label>
-              <input type="text" id="total" class="form-control" readonly>
-            </div>
-            <button type="submit" class="btn btn-success w-100">Proceder a pagar</button>
-          </form>
-        </div>
-      </div>
-    </div>
-  </div>
+  document.getElementById("fecha").value = fecha;
+  document.getElementById("productos").value = productos;
+  document.getElementById("total").value = `$${total}`;
 
-  <!-- Footer -->
-  <footer>
-    <p>© 2025 Monse Underwear | Todos los derechos reservados</p>
-  </footer>
+  const modal = new bootstrap.Modal(document.getElementById("checkoutModal"));
+  modal.show();
+}
 
-  <!-- Scripts -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="script.js"></script>
-</body>
-</html>
+// Manejo de envío del formulario
+document.getElementById("checkoutForm").addEventListener("submit", function(e) {
+  e.preventDefault();
+
+  const data = {
+    fecha: document.getElementById("fecha").value,
+    cliente: document.getElementById("cliente").value,
+    email: document.getElementById("email").value,
+    celular: document.getElementById("celular").value,
+    productos: document.getElementById("productos").value,
+    total: document.getElementById("total").value
+  };
+
+  // Enviar datos a Google Sheets (si ya tienes tu App Script)
+  fetch("URL_DE_TU_WEBAPP_DE_GOOGLE_SHEETS", {
+    method: "POST",
+    body: JSON.stringify(data)
+  });
+
+  // Redirigir al banco para pagar
+  window.open("https://ahorita.bancodeloja.fin.ec/pay?FC2376178369416F947D7E0BCA9CC7F408C5F41D", "_blank");
+});
 
