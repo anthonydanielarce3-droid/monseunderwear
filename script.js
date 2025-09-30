@@ -39,7 +39,7 @@ document.querySelectorAll(".add-to-cart").forEach(button => {
   });
 });
 
-// Renderizar carrito con opción de eliminar
+// Renderizar carrito con botón de quitar ❌
 function renderCart() {
   cartItems.innerHTML = "";
   let total = 0;
@@ -48,8 +48,13 @@ function renderCart() {
     const li = document.createElement("li");
     li.className = "list-group-item d-flex justify-content-between align-items-center";
 
+    // Texto del producto
     const text = document.createElement("span");
     text.textContent = `${item.name} (x${item.quantity})`;
+
+    // Contenedor derecho: precio + botón ❌
+    const right = document.createElement("div");
+    right.className = "d-flex align-items-center";
 
     const price = document.createElement("span");
     price.textContent = `$${(item.price * item.quantity).toFixed(2)}`;
@@ -58,13 +63,11 @@ function renderCart() {
     removeBtn.textContent = "❌";
     removeBtn.className = "btn btn-sm btn-danger ms-2";
     removeBtn.addEventListener("click", () => {
-      cart.splice(index, 1);   // quitar del carrito
-      renderCart();            // refrescar lista
+      cart.splice(index, 1);   // quitar del array
+      renderCart();            // refrescar carrito
       mostrarFormulario();     // refrescar formulario
     });
 
-    const right = document.createElement("div");
-    right.className = "d-flex align-items-center";
     right.appendChild(price);
     right.appendChild(removeBtn);
 
@@ -87,7 +90,7 @@ function mostrarFormulario() {
     productosInput.value = cart.map(item => `${item.name} x${item.quantity}`).join(", ");
     totalInput.value = `$${cart.reduce((sum, item) => sum + item.price * item.quantity, 0).toFixed(2)}`;
   } else {
-    checkoutForm.style.display = "none";
+    checkoutForm.style.display = "none"; // ocultar si ya no hay productos
   }
 }
 
@@ -116,6 +119,7 @@ document.getElementById("banco-btn").addEventListener("click", function(e) {
   .then(res => res.json())
   .then(data => {
     console.log("Guardado en Google Sheets:", data);
+    // abrir el banco en una nueva pestaña
     window.open("https://ahorita.bancodeloja.fin.ec/pay?FC2376178369416F947D7E0BCA9CC7F408C5F41D", "_blank");
   })
   .catch(err => console.error("Error:", err));
