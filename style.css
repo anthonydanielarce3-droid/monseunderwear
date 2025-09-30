@@ -27,18 +27,8 @@ header h1 {
   transform: scale(1.03);
 }
 
-.cart {
+.cart, .modal-content {
   background: #fff;
   border-radius: 12px;
-  padding: 1.5rem;
   box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-  margin-top: 2rem;
-}
-
-footer {
-  background-color: #f78fb3;
-  color: white;
-  text-align: center;
-  padding: 1rem;
-  margin-top: 2rem;
 }
