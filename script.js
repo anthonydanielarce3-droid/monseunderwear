@@ -39,20 +39,42 @@ document.querySelectorAll(".add-to-cart").forEach(button => {
   });
 });
 
-// Renderizar carrito
+// Renderizar carrito con opción de eliminar
 function renderCart() {
   cartItems.innerHTML = "";
   let total = 0;
-  cart.forEach(item => {
+
+  cart.forEach((item, index) => {
     const li = document.createElement("li");
     li.className = "list-group-item d-flex justify-content-between align-items-center";
-    li.textContent = `${item.name} (x${item.quantity})`;
-    const span = document.createElement("span");
-    span.textContent = `$${(item.price * item.quantity).toFixed(2)}`;
-    li.appendChild(span);
+
+    const text = document.createElement("span");
+    text.textContent = `${item.name} (x${item.quantity})`;
+
+    const price = document.createElement("span");
+    price.textContent = `$${(item.price * item.quantity).toFixed(2)}`;
+
+    const removeBtn = document.createElement("button");
+    removeBtn.textContent = "❌";
+    removeBtn.className = "btn btn-sm btn-danger ms-2";
+    removeBtn.addEventListener("click", () => {
+      cart.splice(index, 1);   // quitar del carrito
+      renderCart();            // refrescar lista
+      mostrarFormulario();     // refrescar formulario
+    });
+
+    const right = document.createElement("div");
+    right.className = "d-flex align-items-center";
+    right.appendChild(price);
+    right.appendChild(removeBtn);
+
+    li.appendChild(text);
+    li.appendChild(right);
     cartItems.appendChild(li);
+
     total += item.price * item.quantity;
   });
+
   cartTotal.textContent = total.toFixed(2);
 }
 
@@ -64,12 +86,19 @@ function mostrarFormulario() {
     fechaInput.value = getToday();
     productosInput.value = cart.map(item => `${item.name} x${item.quantity}`).join(", ");
     totalInput.value = `$${cart.reduce((sum, item) => sum + item.price * item.quantity, 0).toFixed(2)}`;
+  } else {
+    checkoutForm.style.display = "none";
   }
 }
 
 // Guardar en Google Sheets al pagar
 document.getElementById("banco-btn").addEventListener("click", function(e) {
   e.preventDefault(); // Evitar abrir el banco inmediatamente
+
+  if (cart.length === 0) {
+    alert("⚠️ El carrito está vacío.");
+    return;
+  }
 
   const datos = {
     fecha: fechaInput.value,
@@ -87,8 +116,6 @@ document.getElementById("banco-btn").addEventListener("click", function(e) {
   .then(res => res.json())
   .then(data => {
     console.log("Guardado en Google Sheets:", data);
-
-    // Ahora abrir el Banco de Loja
     window.open("https://ahorita.bancodeloja.fin.ec/pay?FC2376178369416F947D7E0BCA9CC7F408C5F41D", "_blank");
   })
   .catch(err => console.error("Error:", err));
