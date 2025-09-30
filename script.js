@@ -1,7 +1,6 @@
 const cart = [];
-const cartItems = document.getElementById("cart-items");
-const cartTotal = document.getElementById("cart-total");
 
+// Botones "Agregar al carrito"
 document.querySelectorAll(".add-to-cart").forEach(button => {
   button.addEventListener("click", () => {
     const name = button.getAttribute("data-name");
@@ -15,26 +14,45 @@ document.querySelectorAll(".add-to-cart").forEach(button => {
       cart.push({ name, price, quantity });
     }
 
-    renderCart();
+    // Mostrar formulario al agregar
+    openCheckoutForm();
   });
 });
 
-function renderCart() {
-  cartItems.innerHTML = "";
-  let total = 0;
-  cart.forEach(item => {
-    const li = document.createElement("li");
-    li.className = "list-group-item d-flex justify-content-between align-items-center";
-    li.textContent = `${item.name} (x${item.quantity})`;
-    const span = document.createElement("span");
-    span.textContent = `$${(item.price * item.quantity).toFixed(2)}`;
-    li.appendChild(span);
-    cartItems.appendChild(li);
-    total += item.price * item.quantity;
-  });
-  cartTotal.textContent = total.toFixed(2);
+// Función para abrir el modal con info del carrito
+function openCheckoutForm() {
+  const fecha = new Date().toLocaleString();
+  const productos = cart.map(item => `${item.name} (x${item.quantity})`).join(", ");
+  const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0).toFixed(2);
 
-  // actualizar link del botón (opcional, solo informativo)
-  const bancoBtn = document.getElementById("banco-btn");
-  bancoBtn.href = "https://ahorita.bancodeloja.fin.ec/pay?FC2376178369416F947D7E0BCA9CC7F408C5F41D";
+  document.getElementById("fecha").value = fecha;
+  document.getElementById("productos").value = productos;
+  document.getElementById("total").value = `$${total}`;
+
+  const modal = new bootstrap.Modal(document.getElementById("checkoutModal"));
+  modal.show();
 }
+
+// Manejo de envío del formulario
+document.getElementById("checkoutForm").addEventListener("submit", function(e) {
+  e.preventDefault();
+
+  const data = {
+    fecha: document.getElementById("fecha").value,
+    cliente: document.getElementById("cliente").value,
+    email: document.getElementById("email").value,
+    celular: document.getElementById("celular").value,
+    productos: document.getElementById("productos").value,
+    total: document.getElementById("total").value
+  };
+
+  // Enviar datos a Google Sheets (si ya tienes tu App Script)
+  fetch("URL_DE_TU_WEBAPP_DE_GOOGLE_SHEETS", {
+    method: "POST",
+    body: JSON.stringify(data)
+  });
+
+  // Redirigir al banco para pagar
+  window.open("https://ahorita.bancodeloja.fin.ec/pay?FC2376178369416F947D7E0BCA9CC7F408C5F41D", "_blank");
+});
+
