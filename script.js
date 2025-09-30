@@ -11,13 +11,13 @@ const celularInput = document.getElementById("celular");
 const productosInput = document.getElementById("productos");
 const totalInput = document.getElementById("total");
 
-// Obtener fecha actual en formato dd/mm/yyyy
+// URL de tu Google Apps Script
+const GOOGLE_SHEETS_URL = "https://script.google.com/macros/s/AKfycbyNImy9OHnr2uWJ_LZGYKFTL6VjsZDZIJYDtyuupZIgANnkslBcK7s84A1BopAmHxRf1Q/exec";
+
+// Obtener fecha actual
 function getToday() {
   const hoy = new Date();
-  const dia = String(hoy.getDate()).padStart(2, "0");
-  const mes = String(hoy.getMonth() + 1).padStart(2, "0");
-  const anio = hoy.getFullYear();
-  return `${dia}/${mes}/${anio}`;
+  return hoy.toLocaleDateString("es-EC");
 }
 
 // Agregar producto al carrito
@@ -56,7 +56,7 @@ function renderCart() {
   cartTotal.textContent = total.toFixed(2);
 }
 
-// Mostrar formulario con datos del carrito
+// Mostrar formulario con datos
 function mostrarFormulario() {
   if (cart.length > 0) {
     checkoutForm.style.display = "block";
@@ -66,3 +66,30 @@ function mostrarFormulario() {
     totalInput.value = `$${cart.reduce((sum, item) => sum + item.price * item.quantity, 0).toFixed(2)}`;
   }
 }
+
+// Guardar en Google Sheets al pagar
+document.getElementById("banco-btn").addEventListener("click", function(e) {
+  e.preventDefault(); // Evitar abrir el banco inmediatamente
+
+  const datos = {
+    fecha: fechaInput.value,
+    cliente: clienteInput.value,
+    email: emailInput.value,
+    celular: celularInput.value,
+    productos: productosInput.value,
+    total: totalInput.value
+  };
+
+  fetch(GOOGLE_SHEETS_URL, {
+    method: "POST",
+    body: JSON.stringify(datos)
+  })
+  .then(res => res.json())
+  .then(data => {
+    console.log("Guardado en Google Sheets:", data);
+
+    // Ahora abrir el Banco de Loja
+    window.open("https://ahorita.bancodeloja.fin.ec/pay?FC2376178369416F947D7E0BCA9CC7F408C5F41D", "_blank");
+  })
+  .catch(err => console.error("Error:", err));
+});
