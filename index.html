@@ -68,17 +68,46 @@
     <div class="cart">
       <ul id="cart-items" class="list-group mb-3"></ul>
       <h5 class="text-end">Total: $<span id="cart-total">0.00</span></h5>
+    </div>
+  </section>
 
-      <!-- Botón Banco de Loja -->
-      <div class="text-center mt-3">
+  <!-- Formulario -->
+  <section id="checkout-form" class="container my-5" style="display:none;">
+    <h2 class="text-center mb-4">Datos del Cliente</h2>
+    <form id="customer-form" class="p-3 border rounded bg-light">
+      <div class="mb-3">
+        <label class="form-label">Fecha</label>
+        <input type="text" class="form-control" id="fecha" readonly>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Nombre del Cliente</label>
+        <input type="text" class="form-control" id="cliente" required>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Email</label>
+        <input type="email" class="form-control" id="email" required>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Celular</label>
+        <input type="tel" class="form-control" id="celular" required>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Productos</label>
+        <textarea class="form-control" id="productos" readonly></textarea>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Total</label>
+        <input type="text" class="form-control" id="total" readonly>
+      </div>
+      <div class="text-center">
         <a id="banco-btn" 
            href="https://ahorita.bancodeloja.fin.ec/pay?FC2376178369416F947D7E0BCA9CC7F408C5F41D" 
            target="_blank" 
            class="btn btn-success w-100">
-          💳 Pagar con Banco de Loja
+          💳 Proceder a pagar con Banco de Loja
         </a>
       </div>
-    </div>
+    </form>
   </section>
 
   <!-- Footer -->
@@ -90,3 +119,4 @@
   <script src="script.js"></script>
 </body>
 </html>
+
