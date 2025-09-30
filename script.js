@@ -1,7 +1,18 @@
 const cart = [];
 const cartItems = document.getElementById("cart-items");
 const cartTotal = document.getElementById("cart-total");
+const checkoutForm = document.getElementById("checkout-form");
+const fechaInput = document.getElementById("fecha");
+const productosInput = document.getElementById("productos");
+const totalInput = document.getElementById("total");
 
+// Capturar la fecha de hoy
+function getToday() {
+  const hoy = new Date();
+  return hoy.toLocaleDateString("es-EC", { year: "numeric", month: "2-digit", day: "2-digit" });
+}
+
+// Agregar producto al carrito
 document.querySelectorAll(".add-to-cart").forEach(button => {
   button.addEventListener("click", () => {
     const name = button.getAttribute("data-name");
@@ -16,9 +27,11 @@ document.querySelectorAll(".add-to-cart").forEach(button => {
     }
 
     renderCart();
+    mostrarFormulario();
   });
 });
 
+// Renderizar carrito
 function renderCart() {
   cartItems.innerHTML = "";
   let total = 0;
@@ -33,8 +46,14 @@ function renderCart() {
     total += item.price * item.quantity;
   });
   cartTotal.textContent = total.toFixed(2);
+}
 
-  // actualizar link del botón (opcional, solo informativo)
-  const bancoBtn = document.getElementById("banco-btn");
-  bancoBtn.href = "https://ahorita.bancodeloja.fin.ec/pay?FC2376178369416F947D7E0BCA9CC7F408C5F41D";
+// Mostrar formulario con datos
+function mostrarFormulario() {
+  if (cart.length > 0) {
+    checkoutForm.style.display = "block";
+    fechaInput.value = getToday();
+    productosInput.value = cart.map(item => `${item.name} x${item.quantity}`).join(", ");
+    totalInput.value = `$${cart.reduce((sum, item) => sum + item.price * item.quantity, 0).toFixed(2)}`;
+  }
 }
