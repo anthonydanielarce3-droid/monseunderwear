@@ -33,41 +33,8 @@ function renderCart() {
     total += item.price * item.quantity;
   });
   cartTotal.textContent = total.toFixed(2);
+
+  // actualizar link del botón (opcional, solo informativo)
+  const bancoBtn = document.getElementById("banco-btn");
+  bancoBtn.href = "https://ahorita.bancodeloja.fin.ec/pay?FC2376178369416F947D7E0BCA9CC7F408C5F41D";
 }
-
-// PayPal Checkout
-paypal.Buttons({
-  createOrder: function(data, actions) {
-    const total = document.getElementById("cart-total").textContent;
-    return actions.order.create({
-      purchase_units: [{
-        amount: {
-          value: total
-        }
-      }]
-    });
-  },
-  onApprove: function(data, actions) {
-    return actions.order.capture().then(function(details) {
-      alert("✅ Gracias " + details.payer.name.given_name + ", tu compra fue exitosa!");
-
-      // Enviar pedido a Google Sheets
-      const productos = cart.map(item => `${item.name} x${item.quantity}`).join(", ");
-      const total = document.getElementById("cart-total").textContent;
-
-      fetch("URL_DE_TU_WEBAPP_DE_GOOGLE_SHEETS", {
-        method: "POST",
-        body: JSON.stringify({
-          cliente: details.payer.name.given_name + " " + details.payer.name.surname,
-          email: details.payer.email_address,
-          productos: productos,
-          total: total
-        })
-      });
-
-      // Vaciar carrito después de la compra
-      cart.length = 0;
-      renderCart();
-    });
-  }
-}).render('#paypal-button-container');
