@@ -2,14 +2,22 @@ const cart = [];
 const cartItems = document.getElementById("cart-items");
 const cartTotal = document.getElementById("cart-total");
 const checkoutForm = document.getElementById("checkout-form");
+
+// Inputs del formulario
 const fechaInput = document.getElementById("fecha");
+const clienteInput = document.getElementById("cliente");
+const emailInput = document.getElementById("email");
+const celularInput = document.getElementById("celular");
 const productosInput = document.getElementById("productos");
 const totalInput = document.getElementById("total");
 
-// Capturar la fecha de hoy
+// Obtener fecha actual en formato dd/mm/yyyy
 function getToday() {
   const hoy = new Date();
-  return hoy.toLocaleDateString("es-EC", { year: "numeric", month: "2-digit", day: "2-digit" });
+  const dia = String(hoy.getDate()).padStart(2, "0");
+  const mes = String(hoy.getMonth() + 1).padStart(2, "0");
+  const anio = hoy.getFullYear();
+  return `${dia}/${mes}/${anio}`;
 }
 
 // Agregar producto al carrito
@@ -48,10 +56,11 @@ function renderCart() {
   cartTotal.textContent = total.toFixed(2);
 }
 
-// Mostrar formulario con datos
+// Mostrar formulario con datos del carrito
 function mostrarFormulario() {
   if (cart.length > 0) {
     checkoutForm.style.display = "block";
+
     fechaInput.value = getToday();
     productosInput.value = cart.map(item => `${item.name} x${item.quantity}`).join(", ");
     totalInput.value = `$${cart.reduce((sum, item) => sum + item.price * item.quantity, 0).toFixed(2)}`;
