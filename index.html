@@ -5,7 +5,46 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Monse Underwear</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #fff8f9;
+      color: #333;
+    }
+    header {
+      background: linear-gradient(90deg, #f78fb3, #f8a5c2);
+      color: white;
+      padding: 2rem;
+      text-align: center;
+    }
+    header h1 {
+      font-size: 2.5rem;
+      font-weight: bold;
+    }
+    .product-card {
+      border: none;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      transition: transform 0.2s ease;
+    }
+    .product-card:hover {
+      transform: scale(1.03);
+    }
+    .cart {
+      background: #fff;
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      margin-top: 2rem;
+    }
+    footer {
+      background-color: #f78fb3;
+      color: white;
+      text-align: center;
+      padding: 1rem;
+      margin-top: 2rem;
+    }
+  </style>
 </head>
 <body>
 
@@ -23,7 +62,7 @@
       <!-- Producto 1 -->
       <div class="col-md-4 mb-4">
         <div class="card product-card">
-          <img src="img/boxer.jpg" class="card-img-top" alt="Boxer Hombre">
+          <img src="boxer.jpg" class="card-img-top" alt="Boxer Hombre">
           <div class="card-body text-center">
             <h5 class="card-title">Boxer Hombre</h5>
             <p class="card-text">$8.00</p>
@@ -36,7 +75,7 @@
       <!-- Producto 2 -->
       <div class="col-md-4 mb-4">
         <div class="card product-card">
-          <img src="img/bralette.jpg" class="card-img-top" alt="Bralette Mujer">
+          <img src="bralette.jpg" class="card-img-top" alt="Bralette Mujer">
           <div class="card-body text-center">
             <h5 class="card-title">Bralette Mujer</h5>
             <p class="card-text">$12.00</p>
@@ -49,7 +88,7 @@
       <!-- Producto 3 -->
       <div class="col-md-4 mb-4">
         <div class="card product-card">
-          <img src="img/panty.jpg" class="card-img-top" alt="Panty Mujer">
+          <img src="panty.jpg" class="card-img-top" alt="Panty Mujer">
           <div class="card-body text-center">
             <h5 class="card-title">Panty Mujer</h5>
             <p class="card-text">$6.00</p>
@@ -68,6 +107,8 @@
     <div class="cart">
       <ul id="cart-items" class="list-group mb-3"></ul>
       <h5 class="text-end">Total: $<span id="cart-total">0.00</span></h5>
+
+      <!-- Botón de PayPal -->
       <div id="paypal-button-container" class="mt-3"></div>
     </div>
   </section>
@@ -77,8 +118,85 @@
     <p>© 2025 Monse Underwear | Todos los derechos reservados</p>
   </footer>
 
-  <!-- Scripts -->
+  <!-- Script carrito -->
+  <script>
+    const cart = [];
+    const cartItems = document.getElementById("cart-items");
+    const cartTotal = document.getElementById("cart-total");
+
+    document.querySelectorAll(".add-to-cart").forEach(button => {
+      button.addEventListener("click", () => {
+        const name = button.getAttribute("data-name");
+        const price = parseFloat(button.getAttribute("data-price"));
+        const quantity = parseInt(button.previousElementSibling.value);
+
+        const existingItem = cart.find(item => item.name === name);
+        if (existingItem) {
+          existingItem.quantity += quantity;
+        } else {
+          cart.push({ name, price, quantity });
+        }
+
+        renderCart();
+      });
+    });
+
+    function renderCart() {
+      cartItems.innerHTML = "";
+      let total = 0;
+      cart.forEach(item => {
+        const li = document.createElement("li");
+        li.className = "list-group-item d-flex justify-content-between align-items-center";
+        li.textContent = `${item.name} (x${item.quantity})`;
+        const span = document.createElement("span");
+        span.textContent = `$${(item.price * item.quantity).toFixed(2)}`;
+        li.appendChild(span);
+        cartItems.appendChild(li);
+        total += item.price * item.quantity;
+      });
+      cartTotal.textContent = total.toFixed(2);
+    }
+  </script>
+
+  <!-- SDK de PayPal -->
   <script src="https://www.paypal.com/sdk/js?client-id=TU_CLIENT_ID_AQUI&currency=USD"></script>
-  <script src="script.js"></script>
+  <script>
+    paypal.Buttons({
+      createOrder: function(data, actions) {
+        const total = document.getElementById("cart-total").textContent;
+        return actions.order.create({
+          purchase_units: [{
+            amount: {
+              value: total
+            }
+          }]
+        });
+      },
+      onApprove: function(data, actions) {
+        return actions.order.capture().then(function(details) {
+          alert("✅ Gracias " + details.payer.name.given_name + ", tu compra fue exitosa!");
+          
+          // Enviar pedido a Google Sheets
+          const productos = cart.map(item => `${item.name} x${item.quantity}`).join(", ");
+          const total = document.getElementById("cart-total").textContent;
+
+          fetch("https://script.google.com/macros/s/AKfycbzWgvW96alBiZ55RAAPd6ZJLaa34y6rXQSOo4gReou_E8gtlwnt-opto3xPeXBP6SBzHw/exec", {
+            method: "POST",
+            body: JSON.stringify({
+              cliente: details.payer.name.given_name + " " + details.payer.name.surname,
+              email: details.payer.email_address,
+              productos: productos,
+              total: total
+            })
+          });
+
+          // Vaciar carrito después de compra
+          cart.length = 0;
+          renderCart();
+        });
+      }
+    }).render('#paypal-button-container');
+  </script>
+
 </body>
 </html>
